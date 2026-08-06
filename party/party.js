@@ -267,9 +267,38 @@
     }
   }
 
+  /* ---------- wand tap: magician's smoke-bomb vanish ---------- */
+  function smokePuff(x, y) {
+    var flash = document.createElement('div');
+    flash.className = 'party-smoke-flash';
+    flash.style.left = x + 'px';
+    flash.style.top = y + 'px';
+    layer.appendChild(flash);
+    setTimeout(function () { flash.remove(); }, 350);
+
+    var puffCount = Math.round(rand(7, 10));
+    for (var i = 0; i < puffCount; i++) {
+      var p = document.createElement('div');
+      p.className = 'party-smoke-puff';
+      var size = rand(18, 36);
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = (x + rand(-8, 8)) + 'px';
+      p.style.top = (y + rand(-8, 8)) + 'px';
+      p.style.setProperty('--sx', rand(-45, 45) + 'px');
+      p.style.setProperty('--sy', rand(-85, -25) + 'px');
+      p.style.setProperty('--sscale', rand(2.2, 3.8).toFixed(2));
+      p.style.setProperty('--srot', rand(-45, 45) + 'deg');
+      var delay = rand(0, 90);
+      p.style.animationDelay = delay + 'ms';
+      layer.appendChild(p);
+      (function (el, life) { setTimeout(function () { el.remove(); }, life); })(p, 950 + delay);
+    }
+  }
+
   document.addEventListener('pointerdown', function (e) {
     if (e.isPrimary === false) return;
-    burst(e.clientX, e.clientY, false);
+    smokePuff(e.clientX, e.clientY);
   }, { passive: true });
 
   /* ---------- wand-flick sparkle trail ---------- */
@@ -463,6 +492,41 @@
     });
   }
 
+  /* ---------- scrollspy: highlight the nav link for the section in view ---------- */
+  function setupNavScrollspy() {
+    var navLinks = Array.prototype.slice.call(
+      document.querySelectorAll('#menu-menu-1 > li > a[href^="#"]')
+    );
+    if (!navLinks.length) return;
+
+    var sections = navLinks.map(function (a) {
+      var id = a.getAttribute('href').slice(1);
+      return id ? document.getElementById(id) : null;
+    });
+
+    function setActive(link) {
+      navLinks.forEach(function (a) { a.classList.remove('party-nav-active'); });
+      if (link) link.classList.add('party-nav-active');
+    }
+
+    setActive(navLinks[0]);
+
+    if (!('IntersectionObserver' in window)) return;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var idx = sections.indexOf(entry.target);
+        if (idx > -1) setActive(navLinks[idx]);
+      });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+
+    sections.forEach(function (el) { if (el) observer.observe(el); });
+
+    window.addEventListener('scroll', function () {
+      if (window.scrollY < 200) setActive(navLinks[0]);
+    }, { passive: true });
+  }
+
   /* ---------- boot ---------- */
   function start() {
     document.body.appendChild(layer);
@@ -472,6 +536,7 @@
     if (heroTitle && heroTitle.textContent.trim().length <= 40) splitLetters(heroTitle);
 
     setupReveal();
+    setupNavScrollspy();
 
     initSnitch();
     setTimeout(initOwlDelivery, 700);
