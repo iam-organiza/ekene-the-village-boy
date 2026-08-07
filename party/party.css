@@ -767,6 +767,50 @@ button[type="submit"]:hover {
   fill: #fdf8ec !important;
 }
 
+/* the bundled masonry/isotope plugin fails to compute column
+   positions in this offline export (every item lands in column 0),
+   so lay the gallery out with plain CSS grid instead of trusting
+   its JS-driven absolute positioning */
+.eael-filter-gallery-container.masonry {
+  position: static !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 14px !important;
+}
+.eael-filter-gallery-container.masonry .eael-filterable-gallery-item-wrap {
+  position: static !important;
+  width: auto !important;
+  left: auto !important;
+  top: auto !important;
+}
+.eael-filter-gallery-container.masonry .eael-gallery-grid-item {
+  height: 100%;
+}
+.eael-filter-gallery-container.masonry .gallery-item-thumbnail-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 14px;
+}
+.eael-filter-gallery-container.masonry .gallery-item-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+.eael-filter-gallery-container.masonry .eael-gallery-grid-item:hover .gallery-item-thumbnail {
+  transform: scale(1.06);
+}
+@media (max-width: 767px) {
+  .eael-filter-gallery-container.masonry {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 /* ---------- final RSVP CTA: dusk fading toward the footer's night ---------- */
 .elementor-element-396ff71 {
   position: relative;
