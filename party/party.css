@@ -767,6 +767,15 @@ button[type="submit"]:hover {
   fill: #fdf8ec !important;
 }
 
+/* the anchor now wraps the thumbnail image directly (it used to be an
+   empty sibling with no size, so real clicks landed on the image
+   underneath it and never reached the link) — make sure it still
+   behaves like the block-level wrapper the plugin's CSS expects */
+.eael-gallery-grid-item > a.gallery-item-thumbnail-wrap {
+  display: block;
+  cursor: pointer;
+}
+
 /* ---------- gallery lightbox: full-size view with endless prev/next ---------- */
 .party-lightbox {
   position: fixed;
