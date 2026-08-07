@@ -767,6 +767,110 @@ button[type="submit"]:hover {
   fill: #fdf8ec !important;
 }
 
+/* ---------- gallery lightbox: full-size view with endless prev/next ---------- */
+.party-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 14, 30, 0.9);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.party-lightbox--open {
+  display: flex;
+  opacity: 1;
+}
+body.party-lightbox-lock {
+  overflow: hidden;
+}
+.party-lightbox-img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.96);
+  transition: transform 0.25s ease;
+}
+.party-lightbox--open .party-lightbox-img {
+  transform: scale(1);
+}
+.party-lightbox-close,
+.party-lightbox-prev,
+.party-lightbox-next {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.party-lightbox-close:hover,
+.party-lightbox-prev:hover,
+.party-lightbox-next:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+.party-lightbox-close {
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+}
+.party-lightbox-prev,
+.party-lightbox-next {
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 18px;
+  transform: translateY(-50%);
+}
+.party-lightbox-prev:hover,
+.party-lightbox-next:hover {
+  transform: translateY(-50%) scale(1.08);
+}
+.party-lightbox-prev {
+  left: 14px;
+}
+.party-lightbox-next {
+  right: 14px;
+}
+.party-lightbox-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-family: "Quicksand", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+@media (max-width: 600px) {
+  .party-lightbox-prev,
+  .party-lightbox-next {
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+  }
+  .party-lightbox-close {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+}
+
 /* ---------- final RSVP CTA: dusk fading toward the footer's night ---------- */
 .elementor-element-396ff71 {
   position: relative;
@@ -1142,6 +1246,10 @@ button[type="submit"]:hover {
   .party-reveal {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+  .party-lightbox,
+  .party-lightbox-img {
     transition: none;
   }
 }

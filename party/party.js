@@ -550,6 +550,84 @@
     });
   }
 
+  /* ---------- gallery lightbox: full-size view with endless prev/next ---------- */
+  function initGalleryLightbox() {
+    var links = Array.prototype.slice.call(
+      document.querySelectorAll('.eael-filter-gallery-container .eael-magnific-link')
+    );
+    if (!links.length) return;
+
+    var srcs = links.map(function (a) { return a.getAttribute('href'); });
+    var current = 0;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'party-lightbox';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML =
+      '<button type="button" class="party-lightbox-close" aria-label="Close">&times;</button>' +
+      '<button type="button" class="party-lightbox-prev" aria-label="Previous photo">&#10094;</button>' +
+      '<button type="button" class="party-lightbox-next" aria-label="Next photo">&#10095;</button>' +
+      '<img class="party-lightbox-img" alt="" />' +
+      '<div class="party-lightbox-counter"></div>';
+    document.body.appendChild(overlay);
+
+    var imgEl = overlay.querySelector('.party-lightbox-img');
+    var counterEl = overlay.querySelector('.party-lightbox-counter');
+
+    function render() {
+      imgEl.src = srcs[current];
+      counterEl.textContent = (current + 1) + ' / ' + srcs.length;
+    }
+
+    function open(index) {
+      current = index;
+      render();
+      overlay.classList.add('party-lightbox--open');
+      document.body.classList.add('party-lightbox-lock');
+    }
+
+    function close() {
+      overlay.classList.remove('party-lightbox--open');
+      document.body.classList.remove('party-lightbox-lock');
+    }
+
+    function next() { current = (current + 1) % srcs.length; render(); }
+    function prev() { current = (current - 1 + srcs.length) % srcs.length; render(); }
+
+    links.forEach(function (a, i) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        open(i);
+      });
+    });
+
+    overlay.querySelector('.party-lightbox-close').addEventListener('click', close);
+    overlay.querySelector('.party-lightbox-next').addEventListener('click', next);
+    overlay.querySelector('.party-lightbox-prev').addEventListener('click', prev);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) close();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (!overlay.classList.contains('party-lightbox--open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowRight') next();
+      else if (e.key === 'ArrowLeft') prev();
+    });
+
+    /* swipe left/right on touch devices */
+    var touchStartX = null;
+    overlay.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    overlay.addEventListener('touchend', function (e) {
+      if (touchStartX === null) return;
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); }
+      touchStartX = null;
+    }, { passive: true });
+  }
+
   /* ---------- boot ---------- */
   function start() {
     document.body.appendChild(layer);
@@ -561,6 +639,7 @@
     setupReveal();
     setupNavScrollspy();
     fixGalleryMasonryLayout();
+    initGalleryLightbox();
 
     initSnitch();
     setTimeout(initOwlDelivery, 700);
