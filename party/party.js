@@ -527,6 +527,29 @@
     }, { passive: true });
   }
 
+  /* ---------- gallery: nudge the bundled masonry plugin to re-measure
+     columns once everything has truly settled. It measures column width
+     once, synchronously, on init — if that happens a beat before web
+     fonts swap in (self-hosted MedievalSharp/Quicksand) or the last
+     image finishes reflowing the grid, it can under-measure and land
+     every photo in 2 columns instead of 3. A follow-up "layout" call
+     re-measures against the final, settled sizes. ---------- */
+  function fixGalleryMasonryLayout() {
+    var $ = window.jQuery;
+    if (!$) return;
+    var $gallery = $('.eael-filter-gallery-container.masonry');
+    if (!$gallery.length) return;
+
+    function relayout() { $gallery.isotope('layout'); }
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(relayout);
+    }
+    window.addEventListener('load', function () {
+      setTimeout(relayout, 300);
+    });
+  }
+
   /* ---------- boot ---------- */
   function start() {
     document.body.appendChild(layer);
@@ -537,6 +560,7 @@
 
     setupReveal();
     setupNavScrollspy();
+    fixGalleryMasonryLayout();
 
     initSnitch();
     setTimeout(initOwlDelivery, 700);
