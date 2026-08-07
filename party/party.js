@@ -491,6 +491,21 @@
     return valid;
   }
 
+  /* The "Attendance" submit control is rendered as <a href="#">, not a
+     real submit button — clicking it does two independent things: the
+     browser's native href="#" jump-to-top, AND (via the plugin's own
+     click glue) a form submission. Killing the click's default stops
+     the jump; we then trigger submission ourselves so nothing is lost. */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('.metform-form-content .elementor-button');
+    if (!btn) return;
+    e.preventDefault();
+    var form = btn.closest('form');
+    if (!form) return;
+    if (form.requestSubmit) form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  }, true);
+
   /* Static export fallback: the form can't reach a server yet, so this
      validates client-side and celebrates on success instead of actually
      submitting. Once real hosting/an endpoint is decided, replace the
@@ -498,19 +513,15 @@
      celebrate after that succeeds. */
   var lastCheer = 0;
   document.addEventListener('submit', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
     var rsvpForm = e.target.closest && e.target.closest('.metform-form-content');
 
     if (rsvpForm && !validateRsvpForm(rsvpForm)) {
-      e.preventDefault();
-      e.stopPropagation();
       var firstInvalid = rsvpForm.querySelector('.mf-invalid');
       if (firstInvalid) firstInvalid.focus();
       return;
-    }
-
-    if (rsvpForm) {
-      e.preventDefault();
-      e.stopPropagation();
     }
 
     var now = Date.now();
