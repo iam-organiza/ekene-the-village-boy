@@ -426,10 +426,93 @@
   }
   /* Contact Form 7 fires this when the RSVP is sent successfully */
   document.addEventListener('wpcf7mailsent', celebrate);
-  /* Static export fallback: the forms can't reach a server, so cheer on
-     any submit attempt (debounced so double-clicks don't double-cheer) */
+
+  /* ---------- RSVP form: US phone mask ---------- */
+  function formatUSPhone(digits) {
+    digits = digits.slice(0, 10);
+    if (digits.length > 6) return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+    if (digits.length > 3) return '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+    if (digits.length > 0) return '(' + digits;
+    return '';
+  }
+  function initPhoneMask() {
+    document.addEventListener('input', function (e) {
+      var el = e.target;
+      if (!el.matches || !el.matches('input[name="mf-phone"]')) return;
+      var digits = el.value.replace(/\D/g, '');
+      el.value = formatUSPhone(digits);
+    });
+  }
+
+  /* ---------- RSVP form: validation ---------- */
+  function showFieldError(input, message) {
+    input.classList.toggle('mf-invalid', !!message);
+    /* the template's own .mf-error-message span only appears once its
+       internal (bypassed) validation state flags an error, so it's
+       never actually in the DOM here — manage our own instead */
+    var wrapper = input.closest('.mf-input-wrapper') || input.parentElement;
+    var errorEl = wrapper.querySelector('.party-field-error');
+    if (!errorEl) {
+      errorEl = document.createElement('span');
+      errorEl.className = 'party-field-error';
+      wrapper.appendChild(errorEl);
+    }
+    errorEl.textContent = message || '';
+  }
+
+  function validateRsvpForm(form) {
+    var valid = true;
+
+    var name = form.querySelector('input[name="mf-first-name"]');
+    if (name) {
+      var nameOk = name.value.trim().length > 0;
+      showFieldError(name, nameOk ? '' : 'This field is required.');
+      valid = valid && nameOk;
+    }
+
+    var email = form.querySelector('input[name="mf-email"]');
+    if (email) {
+      var emailVal = email.value.trim();
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+      showFieldError(email, emailOk ? '' : (emailVal ? 'Please enter a valid email address.' : 'This field is required.'));
+      valid = valid && emailOk;
+    }
+
+    var phone = form.querySelector('input[name="mf-phone"]');
+    if (phone) {
+      var digits = phone.value.replace(/\D/g, '');
+      var phoneOk = digits.length === 10;
+      showFieldError(phone, phoneOk ? '' : 'Please enter a valid 10-digit US phone number.');
+      valid = valid && phoneOk;
+    }
+
+    /* mf-comment ("something to say") is intentionally left unvalidated — optional */
+
+    return valid;
+  }
+
+  /* Static export fallback: the form can't reach a server yet, so this
+     validates client-side and celebrates on success instead of actually
+     submitting. Once real hosting/an endpoint is decided, replace the
+     celebrate()-only branch below with a fetch()/AJAX call and only
+     celebrate after that succeeds. */
   var lastCheer = 0;
-  document.addEventListener('submit', function () {
+  document.addEventListener('submit', function (e) {
+    var rsvpForm = e.target.closest && e.target.closest('.metform-form-content');
+
+    if (rsvpForm && !validateRsvpForm(rsvpForm)) {
+      e.preventDefault();
+      e.stopPropagation();
+      var firstInvalid = rsvpForm.querySelector('.mf-invalid');
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
+    if (rsvpForm) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     var now = Date.now();
     if (now - lastCheer < 4000) return;
     lastCheer = now;
@@ -640,6 +723,7 @@
     setupNavScrollspy();
     fixGalleryMasonryLayout();
     initGalleryLightbox();
+    initPhoneMask();
 
     initSnitch();
     setTimeout(initOwlDelivery, 700);

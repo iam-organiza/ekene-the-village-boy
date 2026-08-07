@@ -776,6 +776,16 @@ button[type="submit"]:hover {
   cursor: pointer;
 }
 
+/* ---------- RSVP form: validation error text ---------- */
+.party-field-error {
+  display: block;
+  color: #c0392b;
+  font-family: "Quicksand", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
 /* ---------- gallery lightbox: full-size view with endless prev/next ---------- */
 .party-lightbox {
   position: fixed;
