@@ -1190,11 +1190,23 @@ body.party-lightbox-lock {
 }
 
 /* ---------- hero photo: Ekene with the stingray ---------- */
+/* the template's own overlay img (overlay-img-home@2x...png) is a
+   solid-color cutout with a transparent blob hole in the middle —
+   painted on top of the background-image below to fake a "cut into a
+   blob shape" look by masking everything outside the hole. Hiding it
+   shows the full rectangular photo instead; the aspect-ratio keeps
+   the box sized correctly now that the (hidden) img isn't implicitly
+   giving it a height. */
+.elementor-element-54cb4ca > .elementor-widget-container > img {
+  display: none !important;
+}
 .elementor-element-54cb4ca > .elementor-widget-container {
   background-image: url("../ekene/ekene-playing-with-stingray.jpeg") !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
+  aspect-ratio: 694 / 526;
+  border-radius: 16px;
 }
 
 /* ---------- Birthday King photo: Ekene ---------- */
